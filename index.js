@@ -10,43 +10,39 @@ import userRouter from "./route/userRoutes.js";
 
 const app = express();
 
+// Define allowed origins
 const allowedOrigins = [
-  'https://jeans-store.netlify.app',
-  'http://localhost:3000',
+  "https://jeans-store.netlify.app",
+  "http://localhost:3000"
 ];
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  console.log("Incoming request from origin:", origin);
-
-  // Check if the origin is allowed
-  if (allowedOrigins.includes(origin) || !origin) {
-    // If allowed, set the Access-Control-Allow-Origin header with the request origin
-    res.header("Access-Control-Allow-Origin", origin || "*");
-  }
-
-  // Set additional CORS headers (methods, headers, etc.)
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-
-  // For preflight requests, respond quickly
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
+// Use CORS with a dynamic origin function
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());
 app.use("/products", express.static("upload/products"));
-app.use('/auth', authRouter)
-app.use('/user', userRouter)
+app.use("/auth", authRouter);
+app.use("/user", userRouter);
 
 db();
 
-app.use("/products", productRoute)  
+app.use("/products", productRoute);
 
 // Start server
 const PORT = process.env.PORT || 8000;
