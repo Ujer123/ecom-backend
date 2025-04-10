@@ -11,7 +11,10 @@ import userRouter from "./route/userRoutes.js";
 const app = express();
 
 app.use(cors({
-  origin: "https://jeans-store.netlify.app/",
+  origin: [
+    'https://jeans-store.netlify.app',
+    'http://localhost:3000',
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
