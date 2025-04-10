@@ -10,13 +10,21 @@ import userRouter from "./route/userRoutes.js";
 
 const app = express();
 
+const allowedOrigins = [
+  'https://jeans-store.netlify.app',
+  'http://localhost:3000',
+];
+
 app.use(cors({
-  origin: [
-    'https://jeans-store.netlify.app',
-    'http://localhost:3000',
-  ],
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  credentials: true,
 }));
 
 app.use(express.json());
