@@ -15,17 +15,28 @@ const allowedOrigins = [
   'http://localhost:3000',
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
-}));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log("Incoming request from origin:", origin);
+
+  // Check if the origin is allowed
+  if (allowedOrigins.includes(origin) || !origin) {
+    // If allowed, set the Access-Control-Allow-Origin header with the request origin
+    res.header("Access-Control-Allow-Origin", origin || "*");
+  }
+
+  // Set additional CORS headers (methods, headers, etc.)
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  // For preflight requests, respond quickly
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
 
 app.use(express.json());
 app.use(cookieParser());
